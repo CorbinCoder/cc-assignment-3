@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+    <head>
+        <title>LookBook - Search Results.</title>
+        <script src="{{ url_for('static', filename='script.js') }}"></script>
+        <link type="text/css" rel="stylesheet" href="{{url_for('static', filename='style.css') }}">
+    </head>
+    <body>
+        <h1>Search Results.</h1>
+        <div id="nav" name="nav">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+        <div id="search_container" name="search_container">
+            <form action="{{ url_for('search') }}" id="search_form" name="search_form" method="POST">
+                <label for="search_content">Search: </label>
+                <input type="text" id="search_content" name="search_content">
+                <input type="submit" id="submit_search" name="submit_search" value="Search">
+            </form>
+        </div>
+        {% set are_results = namespace(value=false) %}
+        <div id="user_results_container" name="user_results_container">
+            {% if user_results %}
+            {% set are_results.value = true %}
+                {% for user_result in user_results %}
+                    <div id="user_result_container" name="user_result_container">
+                    {{ user_result['user_name'] }}
+                    <img src="{{ user_result['image_url'] }}" height="100" width="100">
+                        <form action="{{ url_for('profile') }}" id="profile_button" name="profile_button" method="POST">
+                            <input type="text" id="profile_email" name="profile_email" value="{{ user_result['email'] }}" hidden="true">
+                            <input type="submit" id="submit_profile" name="submit_profile" value="Profile">
+                        </form>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        <div id="post_results_container" name="post_results_container">
+            {% if post_results %}
+            {% set are_results.value = true %}
+                {% for post in post_results %}
+                    <div id="post_container" name ="post_container">
+                        <div id="post_content" name="post_content">
+                            <p>{{ post['title'] }}</p>
+                            <p>{{ post['content'] }}</p>
+                            {% if post['image_url'] %}
+                                <img src="{{ post['image_url'] }}" height="100" width="100">
+                            {% endif %}
+                            <form action="{{ url_for('profile') }}" id="profile_button" name="profile_button" method="POST">
+                                <input type="text" id="profile_email" name="profile_email" value="{{ post['email'] }}" hidden="true">
+                                <input type="submit" id="submit_profile" name="submit_profile" value="{{ post['user_name'] }}">
+                            </form>
+                            {% set is_liked = namespace(value=false) %}
+                            {% if liked %}
+                                {% for like in liked %}
+                                    {% if like == post['post_id'] %}
+                                        {% set is_liked.value = true %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% if is_liked.value == false %}
+                                    <form action="{{ url_for('like') }}" id="like_form" name="like_form" method="POST">
+                                        <input type="text" id="like_post_id" name="like_post_id" value="{{ post['post_id'] }}" hidden="true">
+                                        <input type="submit" id="submit_like" name="submit_like" value="Like">
+                                    </form>
+                                {% else %}
+                                    <form action="{{ url_for('unlike') }}" id="unlike_form" name="unlike_form" method="POST">
+                                        <input type="text" id="unlike_post_id" name="unlike_post_id" value="{{ post['post_id'] }}" hidden="true">
+                                        <input type="submit" id="submit_unlike" name="submit_unlike" value="Unlike">
+                                    </form>
+                                {% endif %}
+                            {% else %}
+                                <form action="{{ url_for('like') }}" id="like_form" name="like_form" method="POST">
+                                    <input type="text" id="like_post_id" name="like_post_id" value="{{ post['post_id'] }}" hidden="true">
+                                    <input type="submit" id="submit_like" name="submit_like" value="Like">
+                                </form>
+                            {% endif %}
+                        </div>
+                        <div id="new_comment_container" name="new_comment_container">
+                            <form action="{{ url_for('comment') }}" id="comment_form" name="comment_form" method="POST">
+                                <label for="comment_content">Comment: </label>
+                                <input type="text" id="comment_content" name="comment_content">
+                                <input type="text" id="comment_post_id" name="comment_post_id" value="{{ post['post_id'] }}" hidden="true">
+                                <input type="submit" id="submit_comment" name="submit_comment" value="Submit">
+                            </form>
+                        </div>
+                        {% if comments %}
+                            {% for comment in comments %}
+                                {% if comment['post_id'] == post['post_id'] %}
+                                    <div id="comment_container" name="comment_container">
+                                        <p>{{ comment['name'] }}</p>
+                                        <p>{{ comment['content'] }}</p>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            {% if not post_results %}
+                <p> No results.</p>
+            {% endif %}
+        </div>
+    </body>
+</html>

@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+    <head>
+        <title>LookBook - Home.</title>
+        <script src="{{ url_for('static', filename='script.js') }}"></script>
+        <link type="text/css" rel="stylesheet" href="{{url_for('static', filename='style.css') }}">
+    </head>
+    <body>
+        <div id="profile_banner" name="profile_banner">
+            <h1>{{ user['email'] }}</h1>
+            <img src="{{ user['image_url'] }}" height="100" width="100">
+            <div id="nav" name="nav">
+                <form action="{{ url_for('profile') }}" id="profile" name="profile" method="POST">
+                    <input type="text" id="profile_email" name="profile_email" value="{{ user['email'] }}" hidden="true">
+                    <input type="submit" id="profile_button" name="profile_button" value="Profile">
+                </form>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </div>
+            <div id="search_container" name="search_container">
+                <form action="{{ url_for('search') }}" id="search_form" name="search_form" method="POST">
+                    <label for="search_content">Search: </label>
+                    <input type="text" id="search_content" name="search_content">
+                    <input type="submit" id="submit_search" name="submit_search" value="Search">
+                </form>
+            </div>
+        </div>
+        <div class="main">
+            <div id="posts" name="posts">
+                <div id="new_post_container" name="new_post_container">
+                    <label for="new_post">Create Post.</label>
+                    <form action="{{ url_for('new_post') }}" id="new_post" name="new_post" method="POST" enctype="multipart/form-data">
+                        <label for="new_post_title">Title.</label>
+                        <input type="text" id="new_post_title" name="new_post_title" placeholder="Title.">
+                        <label for="new_post_content">Content.</label>
+                        <input type="text" id="new_post_content" name="new_post_content" placeholder="Content.">
+                        <label for="new_post_image">Image.</label>
+                        <input type="file" id="new_post_image" name="new_post_image" accept=".jpg, .png">
+                        <input type="submit" id="submit_post" name="submit_post" value="Submit">
+                    </form>
+                </div>
+                <div id="message_container" name="message_container">
+                    {% if message %}
+                        <p>{{ message }}</p>
+                    {% endif %}
+                </div>
+                <div id="posts_container" name="post_container">
+                    {% if posts %}
+                        {% for post in posts %}
+                            <div id="post_container" name ="post_container">
+                                <div id="post_content" name="post_content">
+                                    <p>{{ post['title'] }}</p>
+                                    <p>{{ post['content'] }}</p>
+                                    {% if post['image_url'] %}
+                                        <img src="{{ post['image_url'] }}" height="100" width="100">
+                                    {% endif %}
+                                    <form action="{{ url_for('profile') }}" id="profile_button" name="profile_button" method="POST">
+                                        <input type="text" id="profile_email" name="profile_email" value="{{ post['email'] }}" hidden="true">
+                                        <input type="submit" id="submit_profile" name="submit_profile" value="{{ post['user_name'] }}">
+                                    </form>
+                                    {% set is_liked = namespace(value=false) %}
+                                    {% if liked %}
+                                        {% for like in liked %}
+                                            {% if like == post['post_id'] %}
+                                                {% set is_liked.value = true %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if is_liked.value == false %}
+                                            <form action="{{ url_for('like') }}" id="like_form" name="like_form" method="POST">
+                                                <input type="text" id="like_post_id" name="like_post_id" value="{{ post['post_id'] }}" hidden="true">
+                                                <input type="submit" id="submit_like" name="submit_like" value="Like">
+                                            </form>
+                                        {% else %}
+                                            <form action="{{ url_for('unlike') }}" id="unlike_form" name="unlike_form" method="POST">
+                                                <input type="text" id="unlike_post_id" name="unlike_post_id" value="{{ post['post_id'] }}" hidden="true">
+                                                <input type="submit" id="submit_unlike" name="submit_unlike" value="Unlike">
+                                            </form>
+                                        {% endif %}
+                                    {% else %}
+                                        <form action="{{ url_for('like') }}" id="like_form" name="like_form" method="POST">
+                                            <input type="text" id="like_post_id" name="like_post_id" value="{{ post['post_id'] }}" hidden="true">
+                                            <input type="submit" id="submit_like" name="submit_like" value="Like">
+                                        </form>
+                                    {% endif %}
+                                </div>
+                                <div id="new_comment_container" name="new_comment_container">
+                                    <form action="{{ url_for('comment') }}" id="comment_form" name="comment_form" method="POST">
+                                        <label for="comment_content">Comment: </label>
+                                        <input type="text" id="comment_content" name="comment_content">
+                                        <input type="text" id="comment_post_id" name="comment_post_id" value="{{ post['post_id'] }}" hidden="true">
+                                        <input type="submit" id="submit_comment" name="submit_comment" value="Submit">
+                                    </form>
+                                </div>
+                                {% if comments %}
+                                    {% for comment in comments %}
+                                        {% if comment['post_id'] == post['post_id'] %}
+                                            <div id="comment_container" name="comment_container">
+                                                <p>{{ comment['name'] }}</p>
+                                                <p>{{ comment['content'] }}</p>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <p></p>
+                        {% endfor %}
+                    {% else %}
+                        <p>No posts available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    </body>
+    <footer>
+        <p>Footer</p>
+    </footer>
+</html>

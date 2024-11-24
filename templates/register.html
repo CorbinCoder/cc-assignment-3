@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+    <head>
+        <title>LookBook - Register.</title>
+        <script src="{{ url_for('static', filename='script.js') }}"></script>
+        <link type="text/css" rel="stylesheet" href="{{url_for('static', filename='style.css') }}">
+    </head>
+    <body>
+        <label for="register-container">Songscribe</label>
+        <div id="register-container">
+            <div id="register-form">
+                <form action="{{ url_for('register') }}" method="POST" enctype="multipart/form-data">
+                    <label for="email">Email: </label>
+                    <input type="text" id="email" name="email" Placeholder="Email">
+                    <label for="first_name">First Name: </label>
+                    <input type="text" id="first_name" name="first_name" Placeholder="First Name">
+                    <label for="last_name">Last Name: </label>
+                    <input type="text" id="last_name" name="last_name" Placeholder="Last Name">
+                    <label for="dob">Date of Birth: </label>
+                    <input type="text" id="dob" name="dob" Placeholder="Date of Birth">
+                    <label for="user_image">Image.</label>
+                    <input type="file" id="user_image" name="user_image" accept=".jpg, .png">
+                    <label for="password">Password: </label>
+                    <input type="password" id="password" name="password" required>
+                    <label for="confirm_password">Confirm Password: </label>
+                    <input type="password" id="confirm_password" name="confirm_password" required>
+                    <input type="submit" value="Submit">
+                </form>
+                <form action="{{ url_for('logout') }}" method="POST">
+                    <input type="submit" value="Cancel">
+                </form>
+                <div id="message-box">
+                    {% if message %}
+                        <p>{{ message }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

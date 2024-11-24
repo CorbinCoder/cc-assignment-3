@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+    <head>
+        <title>LookBook - Friends.</title>
+        <script src="{{ url_for('static', filename='script.js') }}"></script>
+        <link type="text/css" rel="stylesheet" href="{{url_for('static', filename='style.css') }}">
+    </head>
+    <body>
+        <div id="nav" name="nav">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+        <div id="friends_container" name="friends_container">
+            {% if friends %}
+                {% for friend in friends %}
+                <div id="friend_container" name="friend_container">
+                    <img src="{{ friend['image_url'] }}" height="100" width="100">
+                        <form action="{{ url_for('profile') }}" id="profile_button" name="profile_button" method="POST">
+                            <input type="text" id="profile_email" name="profile_email" value="{{ friend['email'] }}" hidden="true">
+                            <input type="submit" id="submit_profile" name="submit_profile" value="Profile">
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </body>
+</html>

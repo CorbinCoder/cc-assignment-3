@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+    <head>
+        <title>LookBook - Login.</title>
+        <script src="{{ url_for('static', filename='script.js') }}"></script>
+        <link type="text/css" rel="stylesheet" href="{{url_for('static', filename='style.css') }}">
+    </head>
+    <body>
+        <div id="login-container">
+            <div id="login-form"></div>
+                <form action="{{ url_for('login') }}" method="POST">
+                    <input type="text" id="email" name="email" placeholder="Email">
+                    <input type="password" id="password" name="password" placeholder="Password">
+                    <input type="submit" value="Submit">
+                </form>
+            </div>
+            <div id="register-container">
+                <a href="{{ url_for('register') }}">
+                    <button id="register-button">Register</button>
+                </a>
+            </div>
+            <div id="message-box">
+                {% if message %}
+                    <p>{{ message }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </body>
+    <footer>
+        <p>Footer</p>
+    </footer>
+</html>

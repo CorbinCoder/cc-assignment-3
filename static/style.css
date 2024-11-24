@@ -1,0 +1,20 @@
+p {
+    background-color: white;
+}
+
+html {
+    background-color: white;
+}
+
+#post_container {
+    border: 1px solid black;
+}
+
+#new_post_container, #profile_post_container, 
+#profile_banner, #post_content, #comment_container, 
+#new_comment_container, #user_results_container, 
+#user_result_container, #friend_container {
+    border: 1px solid black;
+    margin: 10px;
+    padding: 10px;
+}

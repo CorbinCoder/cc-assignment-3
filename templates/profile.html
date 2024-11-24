@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+    <head>
+        <title>LookBook - Profile.</title>
+        <script src="{{ url_for('static', filename='script.js') }}"></script>
+        <link type="text/css" rel="stylesheet" href="{{url_for('static', filename='style.css') }}">
+    </head>
+    <body>
+        <div class="main">
+            <div id="profile_banner" name="profile_banner">
+                <h1>{{ user['first_name'] }} {{ user['last_name'] }}</h1>
+                <img src="{{ user['image_url'] }}" height="100" width="100">
+                <div id="nav" name="nav">
+                    <a href="{{ url_for('home') }}">Home</a>
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                    {% if user['email'] != session['user']['email'] %}
+                        {% set is_friend = namespace(value=false) %}
+                        {% for friend in friends %}
+                            {% if user['email'] == friend['email_2'] %}
+                                {% set is_friend.value = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if is_friend.value == true %}
+                            <form action="{{ url_for('unfriend') }}" id="unfriend_form" name="unfriend_form" method="POST">
+                                <input type="text" id="unfriend_email" name="unfriend_email" value="{{ user['email'] }}" hidden="true">
+                                <input type="submit" id="submit_unfriend" name="submit_unfriend" value="Remove">
+                            </form>
+                        {% else %}
+                            <form action="{{ url_for('friend') }}" id="friend_form" name="friend_form" method="POST">
+                                <input type="text" id="friend_email" name="friend_email" value="{{ user['email'] }}" hidden="true">
+                                <input type="submit" id="submit_friend" name="submit_friend" value="Add Friend">
+                            </form>
+                        {% endif %}
+                    {% endif %}
+                    <form action="{{ url_for('friends') }}" id="friends_form" name="friends_form" method="POST">
+                        <input type="text" id="friends_email" name="friends_email" value="{{ user['email'] }}" hidden="true">
+                        <input type="submit" id="submit_friends" name="submit_friends" value="Friends">
+                    </form>
+                </div>
+                <div id="search_container" name="search_container">
+                    <form action="{{ url_for('search') }}" id="search_form" name="search_form" method="POST">
+                        <label for="search_content">Search: </label>
+                        <input type="text" id="search_content" name="search_content">
+                        <input type="submit" id="submit_search" name="submit_search" value="Search">
+                    </form>
+                </div>
+            </div>
+            <div id="profile_post_container" name="profile_post_container">
+                {% if posts %}
+                    {% for post in posts %}
+                        <div id="profile_post_container" name="profile_post_container">
+                            <div id="post_content" name="post_content">
+                                <p>{{ post['title'] }}</p>
+                                <p>{{ post['content'] }}</p>
+                                {% if post['image_url'] %}
+                                    <img src="{{ post['image_url'] }}" height="100" width="100">
+                                {% endif %}
+                                <form action="{{ url_for('profile') }}" id="profile_button" name="profile_button" method="POST">
+                                    <input type="text" id="profile_email" name="profile_email" value="{{ post['email'] }}" hidden="true">
+                                    <input type="submit" id="submit_profile" name="submit_profile" value="{{ post['user_name'] }}">
+                                </form>
+                                {% set is_liked = namespace(value=false) %}
+                                {% if liked %}
+                                    {% for like in liked %}
+                                        {% if like == post['post_id'] %}
+                                            {% set is_liked.value = true %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if is_liked.value == false %}
+                                        <form action="{{ url_for('like') }}" id="like_form" name="like_form" method="POST">
+                                            <input type="text" id="like_post_id" name="like_post_id" value="{{ post['post_id'] }}" hidden="true">
+                                            <input type="submit" id="submit_like" name="submit_like" value="Like">
+                                        </form>
+                                    {% else %}
+                                        <form action="{{ url_for('unlike') }}" id="unlike_form" name="unlike_form" method="POST">
+                                            <input type="text" id="unlike_post_id" name="unlike_post_id" value="{{ post['post_id'] }}" hidden="true">
+                                            <input type="submit" id="submit_unlike" name="submit_unlike" value="Unlike">
+                                        </form>
+                                    {% endif %}
+                                {% else %}
+                                    <form action="{{ url_for('like') }}" id="like_form" name="like_form" method="POST">
+                                        <input type="text" id="like_post_id" name="like_post_id" value="{{ post['post_id'] }}" hidden="true">
+                                        <input type="submit" id="submit_like" name="submit_like" value="Like">
+                                    </form>
+                                {% endif %}
+                            </div>
+                            <div id="new_comment_container" name="new_comment_container">
+                                <form action="{{ url_for('comment') }}" id="comment_form" name="comment_form" method="POST">
+                                    <label for="comment_content">Comment: </label>
+                                    <input type="text" id="comment_content" name="comment_content">
+                                    <input type="text" id="comment_post_id" name="comment_post_id" value="{{ post['post_id'] }}" hidden="true">
+                                    <input type="submit" id="submit_comment" name="submit_comment" value="Submit">
+                                </form>
+                            </div>
+                            {% if comments %}
+                                {% for comment in comments %}
+                                    {% if comment['post_id'] == post['post_id'] %}
+                                    <div id="comment_container" name="comment_container">
+                                        <p>{{ comment['name'] }}</p>
+                                        <p>{{ comment['content'] }}</p>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </body>
+    <footer>
+        <p>Footer.</p>
+    </footer>
+</html>

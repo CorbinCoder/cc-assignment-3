@@ -38,24 +38,31 @@ def get_liked(posts):
 
 def start_db_session(ip_addr):
     db_client.create_tables()
-    instance_state = rds_client.describe_instance()
-    print("Printing instance state")
-    print(instance_state)
     table = rds_client.define_tables()
     rds_client.execute_query(table)
-    rds_client.describe_instance()
+    session_id = application.config["SECRET_KEY"].hex()
+    start_datetime = str(datetime.datetime.now())
+    ip_addr = "0.0.0.0"
+    values = (session_id, start_datetime, ip_addr)
     query = """
-        INSERT INTO session_data (session_id, start_datetime, ip_address
-        ) VALUES (
-        {}, {}, {},
-        )""".format(application.config['SECRET_KEY'].hex(), str(datetime.datetime.now()), ip_addr)
-    rds_client.execute_query(query)
+        INSERT INTO session_data (session_id, start_datetime, ip_address) 
+        VALUES (%s, %s, %s)
+        ON DUPLICATE KEY UPDATE
+        start_datetime = VALUES(start_datetime), ip_address = VALUES(ip_address)
+        """
+    rds_client.execute_query(query, values)
 
 def end_db_session():
-    query = ("""
-        UPDATE session_data SET end_datetime = {}
-        WHERE session_id = {}""".format(str(datetime.datetime.now()), application.config['SECRET_KEY'].hex()))
-    rds_client.execute_query(query)
+    query = """
+        UPDATE session_data SET end_datetime = %s
+        WHERE session_id = %s
+        ON DUPLICATE KEY UPDATE
+        end_datetime = VALUES(end_datetime)
+        """
+    end_datetime = str(datetime.datetime.now())
+    session_id = application.config['SECRET_KEY'].hex()
+    values = (end_datetime, session_id)
+    rds_client.execute_query(query, values)
 
 @application.route('/')
 def index():
@@ -74,7 +81,6 @@ def login():
                     posts = db_client.scan("posts")
                     comments = get_comments(posts)
                     liked = get_liked(posts)
-                    print("printing liked")
                     for like in liked:
                         print(like)
                     start_db_session("0.0.0.0")

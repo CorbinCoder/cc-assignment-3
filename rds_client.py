@@ -6,8 +6,13 @@ import boto3
 import config
 import logging
 
-global client, DB_NAME
-client = boto3.client('rds')
+global client
+client = boto3.client('rds', region_name=config.region_name,
+                            aws_access_key_id=config.aws_access_key_id,
+                            aws_secret_access_key=config.aws_secret_access_key)
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 class rds_client:
 
@@ -28,42 +33,51 @@ class rds_client:
             password=config.rds_secret_password,
         )
             cursor = connection.cursor()
-            cursor.execute( """CREATE DATABASE IF NOT EXISTS {} """.format(config.rds_hostname))
+            db_name = "session_data"
+            cursor.execute(f"CREATE DATABASE IF NOT EXISTS{db_name}")
+            connection.commit()
+            logging.info(f"Database '{db_name}' created or already exists.")
+            return True
         except ClientError as e:
             logging.error(e)
-            if e.response['Error']['Code'] == 'DBAlreadyExists':
-                var = True
-            else:
-                var = False
-        return var
-
-    def execute_query(self, query, values=None):
-        connection = None
-        try:
-            connection = mysql.connector.connect(
-            host=config.rds_hostname,
-            database=config.session_db_name,
-            user=config.rds_secret_name,
-            password=config.rds_secret_password,
-            )
-            if connection.is_connected():
-                print("Connected to MySQL database")
-                if values:
-                    cursor = connection.cursor(prepared=True)
-                    cursor.execute(query, values)
-                    connection.commit()
-                else:
-                    cursor = connection.cursor()
-                    cursor.execute(query)
-            else:
-                print("Connection to MySQL database failed")
-        except Error as e:
-            logging.error(e)
+            return False
         finally:
             if connection:
                 cursor.close()
                 connection.close()
                 print("Connection closed")
+
+    def execute_query(self, query, values=None):
+        connection = None
+        cursor = None
+        try:
+            connection = mysql.connector.connect(
+            host=config.rds_hostname,
+            port=3306,
+            database=config.session_db_name,
+            user=config.rds_secret_name,
+            password=config.rds_secret_password,
+            )
+            if connection.is_connected():
+                logging.info("Connected to MySQL database")
+                cursor = connection.cursor(prepared=True)
+                if values:
+                    cursor.execute(query, values)
+                    connection.commit()
+                    logging.info(f"Query executed successfully. {cursor.rowcount} row(s) affected.")
+                else:
+                    results = cursor.execute(query)
+                    cursor.execute(query)
+                    print(results)
+            else:
+                print("Connection to MySQL database failed")
+        except Error as e:
+            logging.error(f"Error executing query: {e}")
+        finally:
+            if connection and connection.is_connected():
+                cursor.close()
+                connection.close()
+                logging.info("Connection closed.")
 
     def describe_instance(self):
         response = client.describe_db_instances(
